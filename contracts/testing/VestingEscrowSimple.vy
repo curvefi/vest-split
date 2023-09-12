@@ -1,9 +1,9 @@
-# @version 0.2.4
+# @version 0.3.9
 """
 @title Simple Vesting Escrow
 @author Curve Finance
 @license MIT
-@notice Vests `ERC20CRV` tokens for a single address
+@notice Vests `ERC20CRV` tokens for a single address - modification for tests
 @dev Intended to be deployed many times via `VotingEscrowFactory`
 """
 
