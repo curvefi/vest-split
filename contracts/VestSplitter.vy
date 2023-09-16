@@ -34,10 +34,8 @@ claimed: public(HashMap[address, uint256])
 
 
 @external
-def __init__(token: ERC20, vest: VestingEscrow):
+def __init__(token: ERC20):
     TOKEN = token
-    if vest.address != empty(address):
-        self.vest = vest
     ADMIN = msg.sender  # Only needed before the distribution is finalized
 
 
