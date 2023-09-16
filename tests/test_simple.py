@@ -70,5 +70,20 @@ def test_vest_one(splitter, vesting_escrow, token, accounts, admin):
         assert token.balanceOf(user) == 10**8 * 10**18
 
 
-def test_vest_many(splitter, accounts, admin):
-    pass
+def test_vest_many(splitter, vesting_escrow, token, many_accounts, admin):
+    accounts = [many_accounts[:200], many_accounts[200:]]
+    fractions = [[10**18 * i for i in range(200)], [10**18 * i for i in range(len(many_accounts) - 200)]]
+    fracmap = [(a, f) for a, f in zip(accounts[0] + accounts[1], fractions[0] + fractions[1])]
+
+    with boa.env.prank(admin):
+        for aa, ff in zip(accounts, fractions):
+            splitter.save_distribution(aa, ff)
+        splitter.finalize_distribution()
+
+    total_fraction = splitter.total_fraction()
+    boa.env.time_travel(366 * 86400)
+
+    for a, f in fracmap:
+        with boa.env.prank(a):
+            splitter.claim()
+        assert token.balanceOf(a) == 10**8 * 10**18 * f // total_fraction
