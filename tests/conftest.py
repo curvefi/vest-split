@@ -8,6 +8,11 @@ def accounts():
 
 
 @pytest.fixture(scope="session")
+def many_accounts():
+    return [boa.env.generate_address() for _ in range(300)]
+
+
+@pytest.fixture(scope="session")
 def admin():
     return boa.env.generate_address()
 
