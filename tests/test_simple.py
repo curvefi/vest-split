@@ -82,14 +82,10 @@ def test_vest_many(splitter, vesting_escrow, token, many_accounts, admin):
 
     total_fraction = splitter.total_fraction()
     boa.env.time_travel(366 * 86400)
-    first_user, _ = fracmap[0]
 
     for a, f in fracmap:
-        if a != first_user:
-            ready_balance = splitter.balanceOf(a)
+        ready_balance = splitter.balanceOf(a)
         with boa.env.prank(a):
             splitter.claim()
         expected_balance = 10**8 * 10**18 * f // total_fraction
-        assert token.balanceOf(a) == expected_balance
-        if a != first_user:
-            assert ready_balance == expected_balance
+        assert token.balanceOf(a) == expected_balance == ready_balance
