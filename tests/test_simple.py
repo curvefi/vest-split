@@ -57,8 +57,17 @@ def test_dist(splitter, vesting_escrow, many_accounts, admin):
     assert total_fraction == splitter.total_fraction()
 
 
-def test_vest_one(splitter, accounts, admin):
-    pass
+def test_vest_one(splitter, vesting_escrow, token, accounts, admin):
+    user = accounts[0]
+    with boa.env.prank(admin):
+        splitter.save_distribution([user], [10**18])
+        splitter.finalize_distribution()
+
+    boa.env.time_travel(366 * 86400)
+
+    with boa.env.prank(user):
+        splitter.claim()
+        assert token.balanceOf(user) == 10**8 * 10**18
 
 
 def test_vest_many(splitter, accounts, admin):
