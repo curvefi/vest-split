@@ -41,14 +41,14 @@ def __init__(token: ERC20):
 
 @external
 def set_vest(vest: VestingEscrow):
-    assert msg.sender == ADMIN
+    assert msg.sender == ADMIN, "Access"
     assert self.vest == empty(VestingEscrow), "Vest already set"
     self.vest = vest
 
 
 @external
 def save_distribution(users: DynArray[address, 200], fractions: DynArray[uint256, 200]):
-    assert msg.sender == ADMIN
+    assert msg.sender == ADMIN, "Access"
     assert not self.finalized, "Distribution is finalized already"
 
     for i in range(200):
@@ -64,7 +64,7 @@ def save_distribution(users: DynArray[address, 200], fractions: DynArray[uint256
 
 @external
 def finalize_distribution():
-    assert msg.sender == ADMIN
+    assert msg.sender == ADMIN, "Access"
     self.finalized = True
 
 
