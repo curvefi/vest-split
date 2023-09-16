@@ -45,7 +45,9 @@ future_admin: public(address)
 @external
 def __init__():
     # ensure that the original contract cannot be initialized
-    self.admin = msg.sender
+    # This is only used in prod version, and this one is just a test "mock"
+    # self.admin = msg.sender
+    pass
 
 
 @external
