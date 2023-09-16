@@ -74,7 +74,7 @@ def initialize(
     @param _end_time Time until everything should be vested
     @param _can_disable Can admin disable recipient's ability to claim tokens?
     """
-    assert self.admin == ZERO_ADDRESS  # dev: can only initialize once
+    assert self.admin == empty(address)  # dev: can only initialize once
 
     self.token = _token
     self.admin = _admin
@@ -230,7 +230,7 @@ def apply_transfer_ownership() -> bool:
     """
     assert msg.sender == self.admin  # dev: admin only
     _admin: address = self.future_admin
-    assert _admin != ZERO_ADDRESS  # dev: admin not set
+    assert _admin != empty(address)  # dev: admin not set
     self.admin = _admin
     log ApplyOwnership(_admin)
 
