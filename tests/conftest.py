@@ -1,5 +1,12 @@
 import boa
 import pytest
+import os
+from datetime import timedelta
+from hypothesis import settings
+
+
+settings.register_profile("default", deadline=timedelta(seconds=1000))
+settings.load_profile(os.getenv(u"HYPOTHESIS_PROFILE", "default"))
 
 
 @pytest.fixture(scope="session")
