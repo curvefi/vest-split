@@ -18,10 +18,11 @@ class StatefulVest(RuleBasedStateMachine):
     def __init__(self):
         super().__init__()
         self.total_donated = 0
+        self.has_vest = False
 
     @initialize(dist=dist, batch_size=batch_size)
     def initializer(self, dist, batch_size):
-        self.initial_time = boa.env.vm.patch.timestamp
+        self.initial_time = boa.env.vm.patch.timestamp  # Vest exists from this time already (but not necessarily set)
         self.n_users = len(dist)
         self.amounts = dist
         self.dist = dist
@@ -38,6 +39,13 @@ class StatefulVest(RuleBasedStateMachine):
                     batch_dist.append(dist.pop())
                 self.splitter.save_distribution(batch_users, batch_dist)
             self.splitter.finalize_distribution()
+
+    @rule()
+    def set_vest(self):
+        if not self.has_vest:
+            with boa.env.prank(self.admin):
+                self.splitter.set_vest(self.vesting_escrow.address)
+            self.has_vest = True
 
     @rule(user_f=user_f, use_claim_for=use_claim_for)
     def claim(self, user_f, use_claim_for):
@@ -74,7 +82,7 @@ class StatefulVest(RuleBasedStateMachine):
 
         dt = boa.env.vm.patch.timestamp - self.initial_time
 
-        expected_total = INITIAL_AMOUNT * min(dt, DISTRIBUTION_TIME) // DISTRIBUTION_TIME + self.total_donated
+        expected_total = self.has_vest * INITIAL_AMOUNT * min(dt, DISTRIBUTION_TIME) // DISTRIBUTION_TIME + self.total_donated
         balances = [self.token.balanceOf(u) for u in self.users]
         total_dist = sum(self.dist)
 

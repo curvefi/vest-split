@@ -49,5 +49,4 @@ def vesting_escrow(token, accounts, splitter, admin):
         escrow.initialize(
             admin, token.address, splitter.address, INITIAL_AMOUNT,
             t0, t0 + DISTRIBUTION_TIME, False)
-        splitter.set_vest(escrow.address)
         return escrow

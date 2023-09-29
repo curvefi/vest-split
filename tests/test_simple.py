@@ -19,6 +19,9 @@ def test_access(splitter, vesting_escrow, accounts, admin):
     not_admin = accounts[0]
 
     with boa.env.prank(admin):
+        splitter.set_vest(vesting_escrow.address)
+
+    with boa.env.prank(admin):
         with boa.reverts("Vest already set"):
             splitter.set_vest(vesting_escrow.address)
 
@@ -41,6 +44,9 @@ def test_access(splitter, vesting_escrow, accounts, admin):
 
 
 def test_dist(splitter, vesting_escrow, many_accounts, admin):
+    with boa.env.prank(admin):
+        splitter.set_vest(vesting_escrow.address)
+
     accounts = [many_accounts[:200], many_accounts[200:]]
     fractions = [[10**18 * i for i in range(200)], [10**18 * i for i in range(len(many_accounts) - 200)]]
     fracmap = [(a, f) for a, f in zip(accounts[0] + accounts[1], fractions[0] + fractions[1])]
@@ -58,6 +64,9 @@ def test_dist(splitter, vesting_escrow, many_accounts, admin):
 
 
 def test_vest_one(splitter, vesting_escrow, token, accounts, admin):
+    with boa.env.prank(admin):
+        splitter.set_vest(vesting_escrow.address)
+
     user = accounts[0]
     with boa.env.prank(admin):
         splitter.save_distribution([user], [10**18])
@@ -71,6 +80,9 @@ def test_vest_one(splitter, vesting_escrow, token, accounts, admin):
 
 
 def test_vest_many(splitter, vesting_escrow, token, many_accounts, admin):
+    with boa.env.prank(admin):
+        splitter.set_vest(vesting_escrow.address)
+
     accounts = [many_accounts[:200], many_accounts[200:]]
     fractions = [[10**18 * i for i in range(200)], [10**18 * i for i in range(len(many_accounts) - 200)]]
     fracmap = [(a, f) for a, f in zip(accounts[0] + accounts[1], fractions[0] + fractions[1])]
