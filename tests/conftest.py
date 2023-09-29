@@ -8,6 +8,9 @@ from hypothesis import settings
 settings.register_profile("default", deadline=timedelta(seconds=1000))
 settings.load_profile(os.getenv(u"HYPOTHESIS_PROFILE", "default"))
 
+INITIAL_AMOUNT = 10**8 * 10**18
+DISTRIBUTION_TIME = 365 * 86400
+
 
 @pytest.fixture(scope="session")
 def accounts():
@@ -44,7 +47,7 @@ def vesting_escrow(token, accounts, splitter, admin):
         token._mint_for_testing(admin, 10**8 * 10**18)
         token.approve(escrow.address, 2**256 - 1)
         escrow.initialize(
-            admin, token.address, splitter.address, 10**8 * 10**18,
-            t0, t0 + 365 * 86400, False)
+            admin, token.address, splitter.address, INITIAL_AMOUNT,
+            t0, t0 + DISTRIBUTION_TIME, False)
         splitter.set_vest(escrow.address)
         return escrow

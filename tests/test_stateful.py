@@ -1,8 +1,10 @@
 import boa
 
 from hypothesis import settings
-from hypothesis.stateful import RuleBasedStateMachine, run_state_machine_as_test, rule, initialize
+from hypothesis.stateful import RuleBasedStateMachine, run_state_machine_as_test, rule, initialize, invariant
 from hypothesis import strategies as st
+
+from .conftest import INITIAL_AMOUNT, DISTRIBUTION_TIME
 
 
 class StatefulVest(RuleBasedStateMachine):
@@ -13,8 +15,13 @@ class StatefulVest(RuleBasedStateMachine):
     time_shift = st.integers(min_value=1, max_value=365 * 86400)
     donation_amount = st.integers(min_value=0, max_value=10**7 * 10**18)
 
+    def __init__(self):
+        super().__init__()
+        self.total_donated = 0
+
     @initialize(dist=dist, batch_size=batch_size)
     def initializer(self, dist, batch_size):
+        self.initial_time = boa.env.vm.patch.timestamp
         self.n_users = len(dist)
         self.amounts = dist
         self.dist = dist
@@ -23,12 +30,13 @@ class StatefulVest(RuleBasedStateMachine):
         users = self.users[:]
 
         with boa.env.prank(self.admin):
-            batch_users = []
-            batch_dist = []
-            for i in range(min(batch_size, len(users))):
-                batch_users.append(users.pop())
-                batch_dist.append(dist.pop())
-            self.splitter.save_distribution(batch_users, batch_dist)
+            while len(users) > 0:
+                batch_users = []
+                batch_dist = []
+                for i in range(min(batch_size, len(users))):
+                    batch_users.append(users.pop())
+                    batch_dist.append(dist.pop())
+                self.splitter.save_distribution(batch_users, batch_dist)
             self.splitter.finalize_distribution()
 
     @rule(user_f=user_f, use_claim_for=use_claim_for)
@@ -49,10 +57,35 @@ class StatefulVest(RuleBasedStateMachine):
     def donate(self, amount):
         with boa.env.prank(self.admin):
             self.token._mint_for_testing(self.splitter.address, amount)
+            self.total_donated += amount
+
+    @invariant()
+    def total_coins(self):
+        in_escrow = self.token.balanceOf(self.vesting_escrow.address)
+        received = sum(self.token.balanceOf(u) for u in self.users)
+        in_splitter = self.token.balanceOf(self.splitter.address)
+        assert in_escrow + received + in_splitter - self.total_donated == INITIAL_AMOUNT
+
+    def teardown(self):
+        # Claim all
+        for u in self.users:
+            with boa.env.prank(u):
+                self.splitter.claim()
+
+        dt = boa.env.vm.patch.timestamp - self.initial_time
+
+        expected_total = INITIAL_AMOUNT * min(dt, DISTRIBUTION_TIME) // DISTRIBUTION_TIME + self.total_donated
+        balances = [self.token.balanceOf(u) for u in self.users]
+        total_dist = sum(self.dist)
+
+        assert self.token.balanceOf(self.splitter.address) < len(self.users)  # Rounding errors leave 1 wei per user max
+
+        for d, balance in zip(self.dist, balances):
+            assert balance == d * expected_total // total_dist
 
 
 def test_stateful_vest(splitter, vesting_escrow, many_accounts, token, admin):
-    StatefulVest.TestCase.settings = settings(max_examples=10, stateful_step_count=10)
+    StatefulVest.TestCase.settings = settings(max_examples=1000, stateful_step_count=100)
     for k, v in locals().items():
         setattr(StatefulVest, k, v)
     run_state_machine_as_test(StatefulVest)
