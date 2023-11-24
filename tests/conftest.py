@@ -4,6 +4,8 @@ import os
 from datetime import timedelta
 from hypothesis import settings
 
+boa.env.enable_fast_mode()
+
 
 settings.register_profile("default", deadline=timedelta(seconds=1000))
 settings.load_profile(os.getenv(u"HYPOTHESIS_PROFILE", "default"))
