@@ -40,15 +40,16 @@ def account_load(fname):
 
 
 if __name__ == '__main__':
+    is_verify = '--verify' in sys.argv[1:]
+
     if '--fork' in sys.argv[1:]:
         boa.env.fork(NETWORK)
         boa.env.eoa = '0xbabe61887f1de2713c6f97e567623453d3C79f67'
     else:
         boa.set_env(NetworkEnv(NETWORK))
-        boa.env.add_account(account_load('babe'))
+        if not is_verify:
+            boa.env.add_account(account_load('babe'))
         boa.env._fork_try_prefetch_state = False
-
-    is_verify = '--verify' in sys.argv[1:]
 
     shares = {}
     splitters = {}
