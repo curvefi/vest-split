@@ -24,6 +24,13 @@ files_and_tokens = [
     ('aleth-reprocessed', [WETH, CRV]),
     ('mseth-reprocessed', [WETH, CRV])]
 
+# Change this for verification
+deployed_splitters = {
+    'crveth-reprocessed': {WETH: None, CRV: None},
+    'aleth-reprocessed': {WETH: None, CRV: None},
+    'mseth-reprocessed': {WETH: None, CRV: None}
+}
+
 
 def account_load(fname):
     path = os.path.expanduser(os.path.join('~', '.brownie', 'accounts', fname + '.json'))
@@ -41,26 +48,27 @@ if __name__ == '__main__':
         boa.env.add_account(account_load('babe'))
         boa.env._fork_try_prefetch_state = False
 
+    is_verify = '--verify' in sys.argv[1:]
+
     shares = {}
     splitters = {}
-    deployed_distribution_fname = os.path.join(os.path.dirname(sys.argv[0]), 'deployed-distribution.json')
 
-    if '--verify' not in sys.argv[1:]:
-        for fname, tokens in files_and_tokens:
-            shares[fname] = []
-            splitters[fname] = {}
+    for fname, tokens in files_and_tokens:
+        shares[fname] = []
+        splitters[fname] = {}
 
-            with open(os.path.join(os.path.dirname(sys.argv[0]), fname + '.csv'), 'r') as f:
-                reader = csv.reader(f)
-                titles = next(reader)
-                ix = titles.index(title)
-                for row in reader:
-                    shares[fname].append((row[1], int(float(row[ix]) * 1e18)))
+        with open(os.path.join(os.path.dirname(sys.argv[0]), fname + '.csv'), 'r') as f:
+            reader = csv.reader(f)
+            titles = next(reader)
+            ix = titles.index(title)
+            for row in reader:
+                shares[fname].append((row[1], int(float(row[ix]) * 1e18)))
 
+        if not is_verify:
             for token in tokens:
                 print('Deploying splitter for %s, token %s' % (fname, token))
                 splitter = boa.load('contracts/VestSplitter.vy', token)
-                splitters[token] = splitter.address
+                splitters[fname][token] = splitter.address
 
                 size = len(shares[fname])
                 pos = 0
@@ -73,11 +81,21 @@ if __name__ == '__main__':
 
                 splitter.finalize_distribution()
 
-        with open(deployed_distribution_fname, 'w') as f:
-            json.dump({'shares': shares, 'splitters': splitters}, f)
+    if not is_verify:
+        print('Distributions deployed')
 
-    print('Distributions deployed')
+    if is_verify:
+        splitters = deployed_splitters
 
-    # Read to verify distribution
-    with open(deployed_distribution_fname, 'r') as f:
-        deployed_distribution = json.load(f)
+    for fname in splitters.keys():
+        for token, address in splitters[fname].items():
+            splitter_interface = boa.load_partial('contracts/VestSplitter.vy')
+            splitter = splitter_interface.at(address)
+            total_shares = 0
+            for i, (user, share) in enumerate(shares[fname]):
+                total_shares += share
+                assert splitter.fractions(user) == share
+                print('{0:.2f}%'.format(i * 100 / len(shares[fname])))
+            assert splitter.total_fraction() == total_shares
+
+    print('Verification successful')
