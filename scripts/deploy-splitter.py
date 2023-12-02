@@ -5,6 +5,8 @@ import json
 import os
 import sys
 import csv
+
+from more_itertools import chunked
 from getpass import getpass
 from eth_account import account
 from boa.network import NetworkEnv
@@ -41,19 +43,41 @@ if __name__ == '__main__':
 
     shares = {}
     splitters = {}
+    deployed_distribution_fname = os.path.join(os.path.dirname(sys.argv[0]), 'deployed-distribution.json')
 
-    for fname, tokens in files_and_tokens:
-        shares[fname] = []
-        splitters[fname] = {}
+    if '--verify' not in sys.argv[1:]:
+        for fname, tokens in files_and_tokens:
+            shares[fname] = []
+            splitters[fname] = {}
 
-        with open(os.path.join(os.path.dirname(sys.argv[0]), fname + '.csv'), 'r') as f:
-            reader = csv.reader(f)
-            titles = next(reader)
-            ix = titles.index(title)
-            for row in reader:
-                shares[fname].append((row[1], float(row[ix])))
+            with open(os.path.join(os.path.dirname(sys.argv[0]), fname + '.csv'), 'r') as f:
+                reader = csv.reader(f)
+                titles = next(reader)
+                ix = titles.index(title)
+                for row in reader:
+                    shares[fname].append((row[1], int(float(row[ix]) * 1e18)))
 
-        for token in tokens:
-            print('Deploying splitter for %s, token %s' % (fname, token))
-            splitter = boa.load('contracts/VestSplitter.vy', token)
-            splitters[token] = splitter.address
+            for token in tokens:
+                print('Deploying splitter for %s, token %s' % (fname, token))
+                splitter = boa.load('contracts/VestSplitter.vy', token)
+                splitters[token] = splitter.address
+
+                size = len(shares[fname])
+                pos = 0
+                for chunk in chunked(shares[fname], 200):
+                    users, fractions = list(zip(*chunk))
+                    splitter.save_distribution(users, fractions)
+                    pos += len(chunk)
+                    print('{0:.2f}%'.format(pos * 100 / size))
+                print()
+
+                splitter.finalize_distribution()
+
+        with open(deployed_distribution_fname, 'w') as f:
+            json.dump({'shares': shares, 'splitters': splitters}, f)
+
+    print('Distributions deployed')
+
+    # Read to verify distribution
+    with open(deployed_distribution_fname, 'r') as f:
+        deployed_distribution = json.load(f)

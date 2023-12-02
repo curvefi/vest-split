@@ -22,6 +22,7 @@ pytest-forked = "^1.6.0"
 ipython = "^8.14.0"
 eth_account = "^0.10"
 cytoolz = "^0.12"
+more_itertools = "^10"
 
 
 [build-system]
