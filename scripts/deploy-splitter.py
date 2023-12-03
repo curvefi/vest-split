@@ -15,20 +15,23 @@ from boa.network import NetworkEnv
 NETWORK = "http://localhost:8545"
 WETH = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
 CRV = "0xD533a949740bb3306d119CC777fa900bA034cd52"
-title = 'ETH to recover'
+title_user = 'User'
+title_eth = 'ETH to recover'
 
 # Only for example, can include any coins (e.g. msETH and alETH)
 # Files are only used for ratios, not for quantities (total quantity is decided by the DAO or whoever distributes)
 files_and_tokens = [
     ('crveth-reprocessed', [WETH, CRV]),
     ('aleth-reprocessed', [WETH, CRV]),
-    ('mseth-reprocessed', [WETH, CRV])]
+    ('mseth-reprocessed', [WETH, CRV]),
+    ('peth-reprocessed', [CRV])]
 
 # Change this for verification
 deployed_splitters = {
     'crveth-reprocessed': {WETH: None, CRV: None},
     'aleth-reprocessed': {WETH: None, CRV: None},
-    'mseth-reprocessed': {WETH: None, CRV: None}
+    'mseth-reprocessed': {WETH: None, CRV: None},
+    'peth-reprocessed': {CRV: None}
 }
 
 
@@ -61,9 +64,10 @@ if __name__ == '__main__':
         with open(os.path.join(os.path.dirname(sys.argv[0]), fname + '.csv'), 'r') as f:
             reader = csv.reader(f)
             titles = next(reader)
-            ix = titles.index(title)
+            ix_user = titles.index(title_user)
+            ix_eth = titles.index(title_eth)
             for row in reader:
-                shares[fname].append((row[1], int(float(row[ix]) * 1e18)))
+                shares[fname].append((row[ix_user], int(float(row[ix_eth]) * 1e18)))
 
         if not is_verify:
             for token in tokens:
