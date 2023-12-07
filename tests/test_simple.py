@@ -79,6 +79,23 @@ def test_vest_one(splitter, vesting_escrow, token, accounts, admin):
         assert token.balanceOf(user) == 10**8 * 10**18
 
 
+def test_vest_self(splitter, token, accounts, admin):
+    with boa.env.prank(admin):
+        splitter.set_vest(splitter.address)
+
+    user = accounts[0]
+    with boa.env.prank(admin):
+        splitter.save_distribution([user], [10**18])
+        splitter.finalize_distribution()
+
+    boa.env.time_travel(366 * 86400)
+
+    with boa.env.prank(user):
+        token._mint_for_testing(splitter.address, 10**8 * 10**18)
+        splitter.claim()
+        assert token.balanceOf(user) == 10**8 * 10**18
+
+
 def test_vest_many(splitter, vesting_escrow, token, many_accounts, admin):
     with boa.env.prank(admin):
         splitter.set_vest(vesting_escrow.address)
