@@ -71,8 +71,9 @@ def finalize_distribution():
 @external
 @nonreentrant('lock')
 def claim(user: address = msg.sender, use_vest: bool = True):
-    if use_vest and self.vest != empty(VestingEscrow):
-        self.vest.claim()
+    vest: VestingEscrow = self.vest
+    if use_vest and vest != empty(VestingEscrow) and vest != VestingEscrow(self):
+        vest.claim()
     total_granted: uint256 = self.total_granted + (TOKEN.balanceOf(self) - self.last_balance)
     self.total_granted = total_granted
 
@@ -90,8 +91,9 @@ def claim(user: address = msg.sender, use_vest: bool = True):
 @view
 def balanceOf(user: address, use_vest: bool = True) -> uint256:
     total_granted: uint256 = self.total_granted
-    if use_vest and self.vest != empty(VestingEscrow):
-        total_granted += self.vest.balanceOf(self)
+    vest: VestingEscrow = self.vest
+    if use_vest and vest != empty(VestingEscrow) and vest != VestingEscrow(self):
+        total_granted += vest.balanceOf(self)
     total_granted = total_granted + TOKEN.balanceOf(self) - self.last_balance
     total_for_user: uint256 = total_granted * self.fractions[user] / self.total_fraction
     return total_for_user - self.claimed[user]
