@@ -84,6 +84,8 @@ if __name__ == '__main__':
                     splitter.save_distribution(users, fractions)
                     pos += len(chunk)
                     print('{0:.2f}%'.format(pos * 100 / size))
+                if token != CRV:
+                    splitter.set_vest(splitter.address)
                 if '--fork' in sys.argv[1:]:
                     print('Gas used:', boa.env._gas_tracker)
                 print()
