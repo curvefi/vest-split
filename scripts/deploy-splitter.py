@@ -15,6 +15,7 @@ from boa.network import NetworkEnv
 NETWORK = "http://localhost:8545"
 WETH = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
 CRV = "0xD533a949740bb3306d119CC777fa900bA034cd52"
+alETH = "0x0100546F2cD4C9D97f798fFC9755E47865FF7Ee6"
 title_user = 'User'
 title_eth = 'ETH to recover'
 
@@ -22,15 +23,15 @@ title_eth = 'ETH to recover'
 # Files are only used for ratios, not for quantities (total quantity is decided by the DAO or whoever distributes)
 files_and_tokens = [
     ('crveth-reprocessed', [WETH, CRV]),
-    ('aleth-reprocessed', [WETH, CRV]),
-    ('mseth-reprocessed', [WETH, CRV]),
+    ('aleth-reprocessed', [WETH, alETH, CRV]),
+    ('mseth-reprocessed', [CRV]),
     ('peth-reprocessed', [CRV])]
 
 # Change this for verification
 deployed_splitters = {
     'crveth-reprocessed': {WETH: None, CRV: None},
-    'aleth-reprocessed': {WETH: None, CRV: None},
-    'mseth-reprocessed': {WETH: None, CRV: None},
+    'aleth-reprocessed': {WETH: None, alETH: None, CRV: None},
+    'mseth-reprocessed': {CRV: None},
     'peth-reprocessed': {CRV: None}
 }
 
