@@ -10,6 +10,7 @@ from more_itertools import chunked
 from getpass import getpass
 from eth_account import account
 from boa.network import NetworkEnv
+from pprint import pprint
 
 
 NETWORK = "http://localhost:8545"
@@ -107,3 +108,6 @@ if __name__ == '__main__':
             assert splitter.total_fraction() == total_shares
 
     print('Verification successful')
+    print()
+    print('Splitters deployed:')
+    pprint(splitters)
