@@ -30,10 +30,13 @@ files_and_tokens = [
 
 # Change this for verification
 deployed_splitters = {
-    'crveth-reprocessed': {WETH: None, CRV: None},
-    'aleth-reprocessed': {WETH: None, alETH: None, CRV: None},
-    'mseth-reprocessed': {CRV: None},
-    'peth-reprocessed': {CRV: None}
+    'crveth-reprocessed': {WETH: "0x3D7b8d296f7D8E37ce57E556DEa3dd6CB01B2F03",
+                           CRV: "0x8CB5416edBce99AA1cAf3e16b594F97272E7b500"},
+    'aleth-reprocessed': {WETH: "0x2fc945d48A4d61eC988F8CAbfFbe6F1EfE07137f",
+                          alETH: "0x0c9da84ef2c698EBc2b17Fb59c63FAA18e367b10",
+                          CRV: "0x94Fd231FBAe3d66c0E1317350D708AC189c9A5cb"},
+    'mseth-reprocessed': {CRV: "0x72aa5fcccf0fbc5d7111ebEf5F460bBf899dacF5"},
+    'peth-reprocessed': {CRV: "0x3f4E97042206D50Ac2d4D0Db1B8af092239E2cCe"}
 }
 
 

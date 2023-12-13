@@ -25,7 +25,7 @@ If you want to test the deployer, just add `--fork` option. This does not requir
 To verify the deployment, put the addresses of deployment contracts into the `deploy-splitter.py` file in
 `deployed_splitters` dictionary and run:
 ```
-./scripts/deploy-splitter.py --verify
+./scripts/deploy-splitter.py --verify --fork
 ```
 This will check if distribution in the deployment exactly coincides with the distribution given in csv files.
 
@@ -92,3 +92,27 @@ CRV amount to vest: 1'522'470.85 CRV
 ### Total to vest:
 
 71'768'597.75 CRV out of 123'915'151 CRV available in the DAO
+
+### Deployed splitters
+
+#### CRV/ETH
+
+WETH: https://etherscan.io/address/0x3D7b8d296f7D8E37ce57E556DEa3dd6CB01B2F03
+
+CRV: https://etherscan.io/address/0x8CB5416edBce99AA1cAf3e16b594F97272E7b500
+
+#### AlETH:
+
+alETH: https://etherscan.io/address/0x0c9da84ef2c698EBc2b17Fb59c63FAA18e367b10
+
+WETH: https://etherscan.io/address/0x2fc945d48A4d61eC988F8CAbfFbe6F1EfE07137f
+
+CRV: https://etherscan.io/address/0x94Fd231FBAe3d66c0E1317350D708AC189c9A5cb
+
+#### msETH
+
+ CRV: https://etherscan.io/address/0x72aa5fcccf0fbc5d7111ebEf5F460bBf899dacF5
+
+#### pETH
+
+CRV: https://etherscan.io/address/0x3f4E97042206D50Ac2d4D0Db1B8af092239E2cCe
