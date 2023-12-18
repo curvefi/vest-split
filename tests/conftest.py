@@ -52,3 +52,8 @@ def vesting_escrow(token, accounts, splitter, admin):
             admin, token.address, splitter.address, INITIAL_AMOUNT,
             t0, t0 + DISTRIBUTION_TIME, False)
         return escrow
+
+
+@pytest.fixture(scope="session")
+def batch_claimer():
+    return boa.load("contracts/BatchClaimer.vy")
