@@ -42,6 +42,12 @@ def splitter(token, admin):
 
 
 @pytest.fixture(scope="session")
+def splitter_2(token, admin):
+    with boa.env.prank(admin):
+        return boa.load('contracts/VestSplitter.vy', token.address)
+
+
+@pytest.fixture(scope="session")
 def vesting_escrow(token, accounts, splitter, admin):
     with boa.env.prank(admin):
         escrow = boa.load('contracts/testing/VestingEscrowSimple.vy')
@@ -50,6 +56,19 @@ def vesting_escrow(token, accounts, splitter, admin):
         token.approve(escrow.address, 2**256 - 1)
         escrow.initialize(
             admin, token.address, splitter.address, INITIAL_AMOUNT,
+            t0, t0 + DISTRIBUTION_TIME, False)
+        return escrow
+
+
+@pytest.fixture(scope="session")
+def vesting_escrow_2(token, accounts, splitter_2, admin):
+    with boa.env.prank(admin):
+        escrow = boa.load('contracts/testing/VestingEscrowSimple.vy')
+        t0 = boa.env.vm.patch.timestamp
+        token._mint_for_testing(admin, 10**8 * 10**18)
+        token.approve(escrow.address, 2**256 - 1)
+        escrow.initialize(
+            admin, token.address, splitter_2.address, INITIAL_AMOUNT,
             t0, t0 + DISTRIBUTION_TIME, False)
         return escrow
 
