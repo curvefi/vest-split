@@ -17,8 +17,4 @@ def claim_all(user: address, splitters: DynArray[address, 10], use_vest:bool = T
         if i >= len(splitters):
             break
         splitter: address = splitters[i]
-        if splitter == empty(address):
-            continue
-        if VestSplitter(splitter).balanceOf(user, use_vest) == 0:
-            continue
         VestSplitter(splitter).claim(user, use_vest)
